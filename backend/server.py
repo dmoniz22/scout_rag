@@ -407,6 +407,13 @@ Please provide a clear, concise answer based on the information provided. If the
         
         answer = await query_ollama_llm(prompt)
         
+        if not answer:
+            return QueryResponse(
+                answer="I found relevant information but couldn't generate a response due to a connection issue with the language model service (Ollama). Please ensure Ollama is running with llama3.1:8b model at localhost:11434.",
+                sources=sources,
+                processing_time=(datetime.now() - start_time).total_seconds()
+            )
+        
         processing_time = (datetime.now() - start_time).total_seconds()
         
         return QueryResponse(
