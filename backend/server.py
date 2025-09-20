@@ -453,6 +453,77 @@ async def clear_documents():
         logger.error(f"Failed to clear documents: {e}")
         raise HTTPException(status_code=500, detail="Failed to clear documents")
 
+@api_router.get("/system/status")
+async def get_system_status():
+    """Get status of all system dependencies"""
+    status = {
+        "qdrant": {"status": "unknown", "message": ""},
+        "ollama_embeddings": {"status": "unknown", "message": ""},
+        "ollama_llm": {"status": "unknown", "message": ""},
+        "overall": "unknown"
+    }
+    
+    # Check Qdrant
+    try:
+        collection_info = qdrant_client.get_collection("scouts_canada_docs")
+        status["qdrant"] = {
+            "status": "healthy", 
+            "message": f"Connected. {collection_info.points_count} documents available."
+        }
+    except Exception as e:
+        status["qdrant"] = {
+            "status": "error", 
+            "message": f"Cannot connect to Qdrant: {str(e)}"
+        }
+    
+    # Check Ollama embeddings
+    try:
+        embedding = await get_ollama_embedding("test")
+        if embedding:
+            status["ollama_embeddings"] = {
+                "status": "healthy", 
+                "message": "nomic-embed-text model responding"
+            }
+        else:
+            status["ollama_embeddings"] = {
+                "status": "error", 
+                "message": "nomic-embed-text model not responding"
+            }
+    except Exception as e:
+        status["ollama_embeddings"] = {
+            "status": "error", 
+            "message": f"Cannot connect to Ollama embeddings: {str(e)}"
+        }
+    
+    # Check Ollama LLM
+    try:
+        response = await query_ollama_llm("Hello", "llama3.1:8b")
+        if response:
+            status["ollama_llm"] = {
+                "status": "healthy", 
+                "message": "llama3.1:8b model responding"
+            }
+        else:
+            status["ollama_llm"] = {
+                "status": "error", 
+                "message": "llama3.1:8b model not responding"
+            }
+    except Exception as e:
+        status["ollama_llm"] = {
+            "status": "error", 
+            "message": f"Cannot connect to Ollama LLM: {str(e)}"
+        }
+    
+    # Determine overall status
+    if all(service["status"] == "healthy" for service in status.values() if isinstance(service, dict) and "status" in service):
+        status["overall"] = "healthy"
+    elif any(service["status"] == "healthy" for service in status.values() if isinstance(service, dict) and "status" in service):
+        status["overall"] = "partial"
+    else:
+        status["overall"] = "error"
+    
+    return status
+
 @api_router.get("/")
 async def root():
     return {"message": "Scouts Canada RAG System API"}
