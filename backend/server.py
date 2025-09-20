@@ -37,11 +37,15 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Qdrant client
-qdrant_client = QdrantClient(host="192.168.68.8", port=6333)
+# Qdrant client - Connect to external Qdrant service
+QDRANT_HOST = os.environ.get('QDRANT_HOST', '192.168.68.8')
+QDRANT_PORT = int(os.environ.get('QDRANT_PORT', '6333'))
+qdrant_client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
 
-# Ollama configuration
-OLLAMA_BASE_URL = "http://localhost:11434"
+# Ollama configuration - Connect to external Ollama service  
+OLLAMA_HOST = os.environ.get('OLLAMA_HOST', 'host.docker.internal')
+OLLAMA_PORT = os.environ.get('OLLAMA_PORT', '11434')
+OLLAMA_BASE_URL = f"http://{OLLAMA_HOST}:{OLLAMA_PORT}"
 
 # Create the main app
 app = FastAPI(title="Scouts Canada RAG System", version="1.0.0")
