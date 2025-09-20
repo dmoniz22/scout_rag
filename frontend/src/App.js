@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Search, Database, Activity, Settings, FileText, Loader2, AlertCircle, CheckCircle, Clock, ExternalLink } from 'lucide-react';
+import { Search, Database, Activity, Settings as SettingsIcon, FileText, Loader2, AlertCircle, CheckCircle, Clock, ExternalLink } from 'lucide-react';
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './components/ui/card';
