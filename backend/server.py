@@ -339,10 +339,31 @@ async def query_documents(request: QueryRequest):
     start_time = datetime.now()
     
     try:
+        # Check Qdrant connection
+        try:
+            collection_info = qdrant_client.get_collection("scouts_canada_docs")
+            if collection_info.points_count == 0:
+                return QueryResponse(
+                    answer="The document database is empty. Please run a scraping job first to populate the database with Scouts Canada documentation.",
+                    sources=[],
+                    processing_time=(datetime.now() - start_time).total_seconds()
+                )
+        except Exception as e:
+            logger.error(f"Qdrant connection failed: {e}")
+            return QueryResponse(
+                answer="I'm unable to connect to the document database. Please ensure Qdrant is running at 192.168.68.8:6333 and try again.",
+                sources=[],
+                processing_time=(datetime.now() - start_time).total_seconds()
+            )
+        
         # Generate embedding for the query
         query_embedding = await get_ollama_embedding(request.question)
         if not query_embedding:
-            raise HTTPException(status_code=500, detail="Failed to generate query embedding")
+            return QueryResponse(
+                answer="I'm unable to connect to the embedding service (Ollama). Please ensure Ollama is running with the nomic-embed-text model at localhost:11434.",
+                sources=[],
+                processing_time=(datetime.now() - start_time).total_seconds()
+            )
         
         # Search Qdrant for similar documents
         search_results = qdrant_client.search(
