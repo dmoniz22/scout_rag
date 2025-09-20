@@ -462,6 +462,38 @@ const DatabaseManager = () => {
 
 // Settings Component
 const Settings = () => {
+  const [systemStatus, setSystemStatus] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchSystemStatus = async () => {
+    try {
+      const response = await axios.get(`${API}/system/status`);
+      setSystemStatus(response.data);
+    } catch (error) {
+      console.error('Failed to fetch system status:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSystemStatus();
+    const interval = setInterval(fetchSystemStatus, 15000); // Refresh every 15 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'healthy':
+        return <Badge className="bg-green-100 text-green-800">Healthy</Badge>;
+      case 'error':
+        return <Badge className="bg-red-100 text-red-800">Error</Badge>;
+      case 'partial':
+        return <Badge className="bg-yellow-100 text-yellow-800">Partial</Badge>;
+      default:
+        return <Badge className="bg-gray-100 text-gray-800">Unknown</Badge>;
+    }
+  };
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <div>
