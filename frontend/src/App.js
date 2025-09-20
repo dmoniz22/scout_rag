@@ -503,6 +503,59 @@ const Settings = () => {
 
       <Card>
         <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            System Status
+            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+          </CardTitle>
+          <CardDescription>Real-time status of system dependencies</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {systemStatus ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Overall System</p>
+                  <p className="text-sm text-gray-500">All system components</p>
+                </div>
+                {getStatusBadge(systemStatus.overall)}
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Qdrant Vector Database</p>
+                    <p className="text-sm text-gray-500">{systemStatus.qdrant.message}</p>
+                  </div>
+                  {getStatusBadge(systemStatus.qdrant.status)}
+                </div>
+                
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Ollama Embeddings</p>
+                    <p className="text-sm text-gray-500">{systemStatus.ollama_embeddings.message}</p>
+                  </div>
+                  {getStatusBadge(systemStatus.ollama_embeddings.status)}
+                </div>
+                
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Ollama LLM</p>
+                    <p className="text-sm text-gray-500">{systemStatus.ollama_llm.message}</p>
+                  </div>
+                  {getStatusBadge(systemStatus.ollama_llm.status)}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-gray-500">Unable to load system status</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>System Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
