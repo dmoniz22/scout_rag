@@ -176,15 +176,25 @@ async def scrape_scouts_website(job_id: str):
     job.start_time = datetime.now(timezone.utc)
     
     try:
-        # Initialize Qdrant collection if it doesn't exist
+        # Check Qdrant connection first
         collection_name = "scouts_canada_docs"
         try:
             qdrant_client.get_collection(collection_name)
-        except:
-            qdrant_client.create_collection(
-                collection_name=collection_name,
-                vectors_config=VectorParams(size=768, distance=Distance.COSINE)
-            )
+            logger.info("Qdrant connection successful")
+        except Exception as e:
+            logger.error(f"Cannot connect to Qdrant: {e}")
+            try:
+                qdrant_client.create_collection(
+                    collection_name=collection_name,
+                    vectors_config=VectorParams(size=768, distance=Distance.COSINE)
+                )
+                logger.info("Created new Qdrant collection")
+            except Exception as create_error:
+                job.status = "failed"
+                job.error_message = f"Cannot connect to Qdrant vector database at 192.168.68.8:6333. Please ensure Qdrant is running. Error: {str(create_error)}"
+                job.end_time = datetime.now(timezone.utc)
+                logger.error(f"Failed to create Qdrant collection: {create_error}")
+                return
         
         base_url = "https://scouts.ca"
         visited_urls = set()
