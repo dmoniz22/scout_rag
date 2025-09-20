@@ -23,7 +23,7 @@ const Navigation = () => {
     { path: '/', icon: Search, label: 'Query' },
     { path: '/scraping', icon: Activity, label: 'Scraping' },
     { path: '/database', icon: Database, label: 'Database' },
-    { path: '/settings', icon: Settings, label: 'Settings' }
+    { path: '/settings', icon: SettingsIcon, label: 'Settings' }
   ];
 
   return (
